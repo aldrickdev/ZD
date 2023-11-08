@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  gin_api_dev:
+    container_name: gin_api_dev
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+
+    environment:
+      - ENV=${ENV}
+      - PORT=${PORT}
+
+    volumes:
+      - ..:/workspaces:cached
+
+    command: sleep infinity

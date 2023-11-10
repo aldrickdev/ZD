@@ -1,39 +1,35 @@
-# Gin API Template
+# ZD
 
-This is a template that can be used to get a running Golang Gin API quickly.
-This repo takes advantage of [Microsoft Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers)
-to create a reproducible environment for any developer. All you need is [Docker](https://www.docker.com/), the Dev 
-Containers VSCode Extension and the [Dev Container CLI](https://github.com/devcontainers/cli).
+This is the Zendesk Service that is responsible for producing User Events.
 
-## Running the Devcontainer
+This project makes use of [Microsoft Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers). This allows you to create reproducible development environments for all developers working on this project. The only requirements are [Docker](https://www.docker.com/), [Visual Studio Code](https://code.visualstudio.com/) and the **Dev Containers VSCode Extension**.
 
-To start the Devcontainer copy the `.devcontainer/.env.example`, name the copy `.env` and leave it in the
-`.devcontainer` directory. Provide a value for `ENV` and `PORT`.
+![devcontainer extension](docs/images/devcontainer-extension.jpg)
 
-- `ENV` tells the application what environment it is running in, `PROD` would run Gin in Release Mode
-- `PORT` tells the application what port it should use to receive requests
+## Using the Devcontainer
 
-After the environment variables, open the `Makefile` and set the `MOD_NAME` variables, this will be the name of the 
-the application. After setting that you can install all the dependencies with the command:
+Before we start, this application depends on 2 environment variables; `ENV` and `PORT`. These can be set by copying the `.env.example` file found in the `.devcontainer` directory and name the copy `.env`. Inside the `.env` file, provide the desired values for `ENV` and `PORT`.
 
-```bash
-make init
+Once you have provided the environment variables, open the `Command Palette`, type `Dev Containers` and select the command `Dev Containers: Reopen in Container`. This should trigger VSCode to build a Devcontainer with everything you need to start working on the project. Once the Devcontainer is created, VSCode will close and reopen with a remote connection to the Devcontainer. From here you have everything you need to work on the project.
+
+Some key tools that were installed into this Devcontainer are:
+
+- [Golang v1.21](https://github.com/devcontainers/images/tree/main/src/go)
+- [NodeJS v18](https://github.com/devcontainers/features/tree/main/src/node)
+- [Task](https://github.com/eitsupi/devcontainer-features/tree/main/src/go-task)
+- [JSON Server](https://www.npmjs.com/package/json-server)
+- [Air](https://github.com/cosmtrek/air/tree/master)
+
+## Running the Application
+
+Once your VSCode has connected to the Devcontainer, make sure you are in the directory `/workspaces` and run the command:
+
+``` bash
+task run
 ```
 
-After setting that up you can start up the Dev Container with the command:
+This will run the application but if you would like to the application to reload when you make changes then you will need to run the command:
 
-```bash
-make dc_up
-```
-
-Once it has finished, you can open a VSCode instance in that container with the command:
-
-```bash
-make dc_open
-```
-
-To run the application, run the command:
-
-```bash
-make run
+``` bash
+task dev-run
 ```

@@ -1,0 +1,41 @@
+{
+    "user": [
+        {
+            "id": 1,
+            "name": "Aldrick",
+            "pod": "Monitor"
+        },
+        {
+            "id": 2,
+            "name": "Daniel",
+            "pod": "Container"
+        },
+        {
+            "id": 3,
+            "name": "Juliana",
+            "pod": "Monitor"
+        }
+    ],
+    "event": [
+        {
+            "id": 1,
+            "name": "Flare",
+            "points": 2
+        },
+        {
+            "id": 2,
+            "name": "Call Offered",
+            "points": 2
+        },
+        {
+            "id": 3,
+            "name": "Call Completed",
+            "points": 5
+        },
+        {
+            "id": 4,
+            "name": "Pickup New Ticket",
+            "points": 2
+        }
+    ]
+}

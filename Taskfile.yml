@@ -1,0 +1,21 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+
+tasks:
+  build:
+    dir: src/cmd
+    cmds:
+      - go build -o main -buildvcs=false
+
+  run:
+    dir: src/cmd
+    cmds:
+      - go run main.go
+
+  dev-run:
+    dir: src/cmd
+    cmds:
+      - air

@@ -1,8 +1,8 @@
 version: "3.8"
 
 services:
-  gin_api_dev:
-    container_name: gin_api_dev
+  devcontainer:
+    container_name: vscode
     build:
       context: ..
       dockerfile: .devcontainer/Dockerfile

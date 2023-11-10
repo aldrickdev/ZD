@@ -38,4 +38,10 @@ To run the Zendesk Service, run the command below. This will run the Zendesk Ser
 task run-zd
 ```
 
+Since running the Zendesk Service depends on the Mock User Service, both need to be running. Since both the Zendesk Service and the Mock User Service hijacks the terminal you will need separate terminals to run them both with the commands above. So the commands above are good if you would like to run them independently, however if you would like to run them both at the same time, without needing to create another terminal instance, you can user the `--parallel` flag that Task provides. The command below will run both of the tasks `run-us` and `run-zd` at the same time, in the same terminal.
+
+``` bash
+task --parallel run-us run-zd
+```
+
 Note that VSCode will automatically port forward the ports that both the Zendesk Service and the Mock User Service expose, to your local machine so that you can access them from outside of the Devcontainer.

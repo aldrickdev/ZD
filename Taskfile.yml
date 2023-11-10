@@ -5,17 +5,23 @@ version: '3'
 vars:
 
 tasks:
-  build:
+  build-zd:
     dir: src/cmd
     cmds:
       - go build -o main -buildvcs=false
 
-  run:
+  run-zd:
     dir: src/cmd
     cmds:
       - go run main.go
 
-  dev-run:
+  run-zd-dev:
     dir: src/cmd
     cmds:
       - air
+  
+  run-us:
+    dir: mockUserService
+    cmds:
+      - json-server --config json-server.json --routes routes.json --watch db.json
+

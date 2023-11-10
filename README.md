@@ -10,7 +10,7 @@ This project makes use of [Microsoft Dev Containers](https://code.visualstudio.c
 
 Before we start, this application depends on 2 environment variables; `ENV` and `PORT`. These can be set by copying the `.env.example` file found in the `.devcontainer` directory and name the copy `.env`. Inside the `.env` file, provide the desired values for `ENV` and `PORT`.
 
-Once you have provided the environment variables, open the `Command Palette`, type `Dev Containers` and select the command `Dev Containers: Reopen in Container`. This should trigger VSCode to build a Devcontainer with everything you need to start working on the project. Once the Devcontainer is created, VSCode will close and reopen with a remote connection to the Devcontainer. From here you have everything you need to work on the project.
+Once you have provided the environment variables, open the `Command Palette`, type `Dev Containers` and select the command `Dev Containers: Reopen in Container`. This should trigger VSCode to build a Devcontainer with everything you need to start working on the project. Once the Devcontainer is created, VSCode will close and reopen with a remote connection to the Devcontainer. From here you have everything you need to work on the project. If you need to close the remote connection between VSCode and the Devcontainer open the `Command Palette` and select the command `Dev Containers: Reopen Folder Locally`.
 
 Some key tools that were installed into this Devcontainer are:
 
@@ -20,16 +20,22 @@ Some key tools that were installed into this Devcontainer are:
 - [JSON Server](https://www.npmjs.com/package/json-server)
 - [Air](https://github.com/cosmtrek/air/tree/master)
 
-## Running the Application
+## Running the Zendesk Service
 
-Once your VSCode has connected to the Devcontainer, make sure you are in the directory `/workspaces` and run the command:
+Before continuing, make sure that you are in VSCode, have a remote connection to the Devcontainer and are in the `/workspaces` directory. Getting a remote connection to the Devcontainer is covered in section [Using the Devcontainer](#using-the-devcontainer).
 
-``` bash
-task run
-```
+The application has a dependency on the User Service which currently, is responsible for providing all available users and event data. Currently, the User Service is under development so to mock this User Service, we are using [JSON Server](https://www.npmjs.com/package/json-server). 
 
-This will run the application but if you would like to the application to reload when you make changes then you will need to run the command:
+To run the Mocked User Service, run the command below, this will startup the Mocked User Service locally so that the Zendesk Service can get the required data for it to run.
 
 ``` bash
-task dev-run
+task run-us
 ```
+
+To run the Zendesk Service, run the command below. This will run the Zendesk Service locally.
+
+``` bash
+task run-zd
+```
+
+Note that VSCode will automatically port forward the ports that both the Zendesk Service and the Mock User Service expose, to your local machine so that you can access them from outside of the Devcontainer.

@@ -4,6 +4,7 @@ import (
 	"zd/envvars"
 	httpserver "zd/internal/adapters/driven/httpServer"
 	"zd/internal/applications/core/zendesk"
+	"zd/internal/utils"
 )
 
 func init() {
@@ -13,6 +14,8 @@ func init() {
 func main() {
 	ep := zendesk.NewZendeskMock()
 	httpServer := httpserver.NewAdapter(*ep)
+
+	utils.GracefuleShutdown()
 
 	httpServer.Run()
 }

@@ -7,7 +7,11 @@ import (
 	"syscall"
 )
 
-func GracefuleShutdown() {
+type Closable interface {
+	GracefulShutdown()
+}
+
+func GracefulShutdown(c []Closable) {
 	sigChannel := make(chan os.Signal, 1)
 	signal.Notify(
 		sigChannel,
@@ -19,7 +23,13 @@ func GracefuleShutdown() {
 	go func() {
 		<-sigChannel
 		// Handle Shutdown
-		fmt.Println("Shutdown signal has been captured")
+		fmt.Println("Closing Closables")
+
+		for _, closable := range c {
+			closable.GracefulShutdown()
+		}
+		fmt.Println("Closed all Closables")
+
 		os.Exit(0)
 	}()
 }

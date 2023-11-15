@@ -2,7 +2,6 @@ version: "3.8"
 
 services:
   devcontainer:
-    container_name: vscode
     build:
       context: ..
       dockerfile: .devcontainer/Dockerfile
@@ -15,3 +14,11 @@ services:
       - ..:/workspaces:cached
 
     command: sleep infinity
+
+  broker:
+    hostname: wabbit
+    image: rabbitmq:3.12.8
+
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin

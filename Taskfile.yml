@@ -1,24 +1,28 @@
 # https://taskfile.dev
-
 version: '3'
 
 vars:
 
 tasks:
   build-zd:
-    dir: src/cmd
+    dir: cmd/app
     cmds:
       - go build -o main -buildvcs=false
 
   run-zd:
-    dir: src/cmd
+    dir: cmd/app
     cmds:
       - go run main.go
 
   run-zd-dev:
-    dir: src/cmd
+    dir: cmd/app
     cmds:
       - air
+  
+  run-con:
+    dir: cmd/consumer
+    cmds:
+      - go run main.go
   
   run-us:
     dir: mockUserService

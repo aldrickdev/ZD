@@ -45,3 +45,5 @@ task --parallel run-us run-zd
 ```
 
 Note that VSCode will automatically port forward the ports that both the Zendesk Service and the Mock User Service expose, to your local machine so that you can access them from outside of the Devcontainer.
+
+If you would like to see if messages are actually being added to the queue, you can also run the consumer app located in `cmd/consumer`. This is a very simple Go application that receives messages from the queue so that you can see that it is working.

@@ -42,16 +42,7 @@ func main() {
 	)
 	checkError(err, "Failed to declare a queue")
 
-	err = ch.QueueBind(
-		q.Name,    // queue name
-		"",        // routing key
-		"zendesk", // exchange
-		false,     // no-wait
-		nil,       // arguments
-	)
-	checkError(err, "Failed to bind a queue")
-
-	routing_key := "new.userEvent"
+	routing_key := "new.userevent"
 	err = ch.QueueBind(
 		q.Name,      // queue name
 		routing_key, // routing key

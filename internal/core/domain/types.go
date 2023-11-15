@@ -1,4 +1,4 @@
-package zendesk
+package domain
 
 type Event struct {
 	ID     uint   `json:"id"`

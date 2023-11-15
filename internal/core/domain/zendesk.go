@@ -1,4 +1,4 @@
-package zendesk
+package domain
 
 import (
 	"encoding/json"
@@ -10,8 +10,8 @@ import (
 
 type ZendeskMock struct{}
 
-func NewZendeskMock() *ZendeskMock {
-	return &ZendeskMock{}
+func NewZendeskMock() ZendeskMock {
+	return ZendeskMock{}
 }
 
 func (z ZendeskMock) GetUserEvent() (*UserEvent, error) {
@@ -41,6 +41,7 @@ func (z ZendeskMock) GetUserEvent() (*UserEvent, error) {
 	}, nil
 }
 func (z ZendeskMock) getAvailableEvents() ([]Event, error) {
+	// TODO: Make this url configurable
 	requestURL := "http://localhost:4001/api/v1/event"
 	data, err := utils.GetRequest(requestURL)
 	if err != nil {
@@ -56,6 +57,7 @@ func (z ZendeskMock) getAvailableEvents() ([]Event, error) {
 	return events, nil
 }
 func (z ZendeskMock) getAvailableUsers() ([]User, error) {
+	// TODO: Make this url configurable
 	requestURL := "http://localhost:4001/api/v1/user"
 	data, err := utils.GetRequest(requestURL)
 	if err != nil {

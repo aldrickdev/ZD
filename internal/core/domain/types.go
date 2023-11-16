@@ -13,7 +13,6 @@ type User struct {
 	Pod  string `json:"pod"`
 }
 type UserEvent struct {
-	UserID    uint   `json:"user_id"`
-	EventName string `json:"event_name"`
-	Points    uint   `json:"points"`
+	UserID  uint `json:"user_id"`
+	EventID uint `json:"event_id"`
 }

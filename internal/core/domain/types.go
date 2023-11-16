@@ -6,8 +6,6 @@ type Event struct {
 	Points uint   `json:"points"`
 }
 type User struct {
-	// TODO: I think using email might be better because this would be the most
-	// reliable way to match users across the entire application
 	ID   uint   `json:"id"`
 	Name string `json:"name"`
 	Pod  string `json:"pod"`

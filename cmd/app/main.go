@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"zd/envvars"
 	"zd/internal/core/service/zendeskservice"
 	"zd/internal/driven/rabbitmq"
@@ -16,26 +17,41 @@ func init() {
 }
 
 func main() {
+	// Creating and Configuring the RabbitMQ Driven Actor
 	queue := rabbitmq.New()
-	queue.Connect("amqp://admin:admin@broker:5672")
+	rmqConnectionString := fmt.Sprintf(
+		"amqp://%s:%s@%s:%s",
+		envvars.Env.RMQ_USER,
+		envvars.Env.RMQ_PASS,
+		envvars.Env.RMQ_DOMAIN,
+		envvars.Env.RMQ_PORT,
+	)
+	queue.Connect(rmqConnectionString)
 	queue.DeclareExchange("zendesk", "topic")
 
-	srv := zendeskservice.New(queue)
-	httpserver := ginserver.NewGinServer(srv)
-	scheduler := schedule.NewSchedule(srv, 50)
+	// Creating the Core Domain Service
+	srv := zendeskservice.New(
+		queue,
+		fmt.Sprintf("%s:%s", envvars.Env.USER_SRV_DOMAIN, envvars.Env.USER_SRV_PORT),
+		"/api/v1/event",
+		"/api/v1/user",
+	)
 
+	// Creating and Configuring the Driver Actors
+	//   HTTP Driver
+	httpserver := ginserver.New(srv)
 	if envvars.Env.ENV == "PROD" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	server := gin.Default()
 	server.GET("/", httpserver.GetUserEvent)
 
-	utils.GracefulShutdown([]utils.Closable{
-		queue,
-	})
+	// 	 Schedule Driver
+	scheduler := schedule.New(srv, 50)
 
+	// Run the Drivers
 	go func() {
-		err := server.Run(envvars.Env.PORT)
+		err := server.Run(envvars.Env.HTTP_PORT)
 		if err != nil {
 			panic(err)
 		}
@@ -43,6 +59,12 @@ func main() {
 
 	scheduler.Run()
 
+	// Starting Graceful Shutdown Channel
+	utils.GracefulShutdown([]utils.Closable{
+		queue,
+	})
+
+	// Loop to prevent main routine from stopping
 	var forever chan struct{}
 	<-forever
 }

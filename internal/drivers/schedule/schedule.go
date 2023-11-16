@@ -11,7 +11,7 @@ type Schedule struct {
 	maxInterval    uint
 }
 
-func NewSchedule(zs ports.ZendeskService, mi uint) *Schedule {
+func New(zs ports.ZendeskService, mi uint) *Schedule {
 	return &Schedule{
 		zendeskService: zs,
 		maxInterval:    mi,

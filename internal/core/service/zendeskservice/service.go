@@ -13,8 +13,12 @@ type service struct {
 	z domain.ZendeskMock
 }
 
-func New(q ports.UserEventQueue) service {
-	z := domain.NewZendeskMock()
+func New(q ports.UserEventQueue, userServiceLocation, eventPath, userPath string) service {
+	z := domain.NewZendeskMock(
+		userServiceLocation,
+		eventPath,
+		userPath,
+	)
 
 	return service{
 		q: q,

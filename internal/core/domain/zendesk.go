@@ -8,10 +8,18 @@ import (
 	"zd/internal/utils"
 )
 
-type ZendeskMock struct{}
+type ZendeskMock struct {
+	userServiceLocation string
+	eventPath           string
+	userPath            string
+}
 
-func NewZendeskMock() ZendeskMock {
-	return ZendeskMock{}
+func NewZendeskMock(userServiceLocation, eventPath, userPath string) ZendeskMock {
+	return ZendeskMock{
+		userServiceLocation: userServiceLocation,
+		eventPath:           eventPath,
+		userPath:            userPath,
+	}
 }
 
 func (z ZendeskMock) GetUserEvent() (*UserEvent, error) {
@@ -40,8 +48,12 @@ func (z ZendeskMock) GetUserEvent() (*UserEvent, error) {
 	}, nil
 }
 func (z ZendeskMock) getAvailableEvents() ([]Event, error) {
-	// TODO: Make this url configurable
-	requestURL := "http://localhost:4001/api/v1/event"
+	// "http://localhost:4001/api/v1/event",
+	requestURL := fmt.Sprintf(
+		"http://%s%s",
+		z.userServiceLocation,
+		z.eventPath,
+	)
 	data, err := utils.GetRequest(requestURL)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting available events: %s", err)
@@ -56,8 +68,12 @@ func (z ZendeskMock) getAvailableEvents() ([]Event, error) {
 	return events, nil
 }
 func (z ZendeskMock) getAvailableUsers() ([]User, error) {
-	// TODO: Make this url configurable
-	requestURL := "http://localhost:4001/api/v1/user"
+	// "http://localhost:4001/api/v1/user"
+	requestURL := fmt.Sprintf(
+		"http://%s%s",
+		z.userServiceLocation,
+		z.userPath,
+	)
 	data, err := utils.GetRequest(requestURL)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting available users: %s", err)

@@ -12,7 +12,7 @@ type Gin struct {
 	zendeskService ports.ZendeskService
 }
 
-func NewGinServer(service ports.ZendeskService) *Gin {
+func New(service ports.ZendeskService) *Gin {
 	return &Gin{
 		zendeskService: service,
 	}

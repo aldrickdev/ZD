@@ -35,9 +35,8 @@ func (z ZendeskMock) GetUserEvent() (*UserEvent, error) {
 	randomEvent := randomSelection(events)
 
 	return &UserEvent{
-		UserID:    randomUser.ID,
-		EventName: randomEvent.Name,
-		Points:    randomEvent.Points,
+		UserID:  randomUser.ID,
+		EventID: randomEvent.ID,
 	}, nil
 }
 func (z ZendeskMock) getAvailableEvents() ([]Event, error) {

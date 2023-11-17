@@ -8,21 +8,21 @@ import (
 	"zd/internal/utils"
 )
 
-type ZendeskMock struct {
+type Zendesk struct {
 	userServiceLocation string
 	eventPath           string
 	userPath            string
 }
 
-func NewZendeskMock(userServiceLocation, eventPath, userPath string) ZendeskMock {
-	return ZendeskMock{
+func NewZendesk(userServiceLocation, eventPath, userPath string) Zendesk {
+	return Zendesk{
 		userServiceLocation: userServiceLocation,
 		eventPath:           eventPath,
 		userPath:            userPath,
 	}
 }
 
-func (z ZendeskMock) GetUserEvent() (*UserEvent, error) {
+func (z Zendesk) GetUserEvent() (*UserEvent, error) {
 	users, err := z.getAvailableUsers()
 	if err != nil {
 		return nil, fmt.Errorf("error while getting all available users: %s", err)
@@ -47,7 +47,7 @@ func (z ZendeskMock) GetUserEvent() (*UserEvent, error) {
 		EventID: randomEvent.ID,
 	}, nil
 }
-func (z ZendeskMock) getAvailableEvents() ([]Event, error) {
+func (z Zendesk) getAvailableEvents() ([]Event, error) {
 	// "http://localhost:4001/api/v1/event",
 	requestURL := fmt.Sprintf(
 		"http://%s%s",
@@ -67,7 +67,7 @@ func (z ZendeskMock) getAvailableEvents() ([]Event, error) {
 
 	return events, nil
 }
-func (z ZendeskMock) getAvailableUsers() ([]User, error) {
+func (z Zendesk) getAvailableUsers() ([]User, error) {
 	// "http://localhost:4001/api/v1/user"
 	requestURL := fmt.Sprintf(
 		"http://%s%s",

@@ -10,11 +10,11 @@ type service struct {
 	q ports.UserEventQueue
 
 	// Core
-	z domain.ZendeskMock
+	z domain.Zendesk
 }
 
 func New(q ports.UserEventQueue, userServiceLocation, eventPath, userPath string) service {
-	z := domain.NewZendeskMock(
+	z := domain.NewZendesk(
 		userServiceLocation,
 		eventPath,
 		userPath,

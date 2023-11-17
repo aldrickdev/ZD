@@ -12,13 +12,15 @@ type Zendesk struct {
 	userServiceLocation string
 	eventPath           string
 	userPath            string
+	requester           utils.Requester
 }
 
-func NewZendesk(userServiceLocation, eventPath, userPath string) Zendesk {
+func NewZendesk(requester utils.Requester, userServiceLocation, eventPath, userPath string) Zendesk {
 	return Zendesk{
 		userServiceLocation: userServiceLocation,
 		eventPath:           eventPath,
 		userPath:            userPath,
+		requester:           requester,
 	}
 }
 
@@ -54,7 +56,7 @@ func (z Zendesk) getAvailableEvents() ([]Event, error) {
 		z.userServiceLocation,
 		z.eventPath,
 	)
-	data, err := utils.GetRequest(requestURL)
+	data, err := z.requester.Get(requestURL)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting available events: %s", err)
 	}
@@ -74,7 +76,7 @@ func (z Zendesk) getAvailableUsers() ([]User, error) {
 		z.userServiceLocation,
 		z.userPath,
 	)
-	data, err := utils.GetRequest(requestURL)
+	data, err := z.requester.Get(requestURL)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting available users: %s", err)
 	}
@@ -91,6 +93,11 @@ func (z Zendesk) getAvailableUsers() ([]User, error) {
 func randomSelection[O User | Event](obj []O) O {
 	randomNumberGenerator := rand.New(rand.NewSource(time.Now().Unix()))
 	lastIndex := len(obj) - 1
+
+	// If O is an array with a single element, just return that element
+	if lastIndex == 0 {
+		return obj[lastIndex]
+	}
 	randomNumber := randomNumberGenerator.Intn(lastIndex)
 
 	return obj[randomNumber]

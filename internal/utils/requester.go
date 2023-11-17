@@ -6,7 +6,17 @@ import (
 	"net/http"
 )
 
-func GetRequest(url string) ([]byte, error) {
+type Requester interface {
+	Get(string) ([]byte, error)
+}
+
+type Request struct{}
+
+func NewRequester() Requester {
+	return Request{}
+}
+
+func (r Request) Get(url string) ([]byte, error) {
 	res, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("error make request: %s", err)

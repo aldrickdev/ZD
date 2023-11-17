@@ -3,6 +3,7 @@ package zendeskservice
 import (
 	"zd/internal/core/domain"
 	"zd/internal/core/ports"
+	"zd/internal/utils"
 )
 
 type service struct {
@@ -13,8 +14,9 @@ type service struct {
 	z domain.Zendesk
 }
 
-func New(q ports.UserEventQueue, userServiceLocation, eventPath, userPath string) service {
+func New(requester utils.Requester, q ports.UserEventQueue, userServiceLocation, eventPath, userPath string) service {
 	z := domain.NewZendesk(
+		requester,
 		userServiceLocation,
 		eventPath,
 		userPath,

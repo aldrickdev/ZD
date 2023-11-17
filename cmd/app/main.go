@@ -30,7 +30,9 @@ func main() {
 	queue.DeclareExchange("zendesk", "topic")
 
 	// Creating the Core Domain Service
+	requester := utils.NewRequester()
 	srv := zendeskservice.New(
+		requester,
 		queue,
 		fmt.Sprintf("%s:%s", envvars.Env.USER_SRV_DOMAIN, envvars.Env.USER_SRV_PORT),
 		"/api/v1/event",

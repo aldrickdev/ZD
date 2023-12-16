@@ -6,15 +6,19 @@ import (
 	"zd/internal/core/ports"
 )
 
+type ScheduledFunc func() error
+
 type Schedule struct {
 	zendeskService ports.ZendeskService
 	maxInterval    uint
+	fn             ScheduledFunc
 }
 
-func New(zs ports.ZendeskService, mi uint) *Schedule {
+func New(zs ports.ZendeskService, mi uint, fn ScheduledFunc) *Schedule {
 	return &Schedule{
 		zendeskService: zs,
 		maxInterval:    mi,
+		fn:             fn,
 	}
 }
 
@@ -25,7 +29,7 @@ func (s Schedule) Run() {
 			randomInterval := randomNumberGenerator.Intn(int(s.maxInterval))
 			time.Sleep(time.Second * time.Duration(randomInterval))
 
-			s.zendeskService.GetUserEvent()
+			s.fn()
 		}
 	}()
 }

@@ -50,9 +50,8 @@ func main() {
 	server.GET("/", httpserver.GetUserEvent)
 
 	// 	 Schedule Driver
-	// genSch := schedule.New(srv, 50, srv.GenerateUserEvent)
-	batchSch := schedule.New(srv, 10, srv.BatchUserEvent)
-	drainSch := schedule.New(srv, 50, srv.PublishBatch)
+	batchSch := schedule.New(srv, 3, true, srv.BatchUserEvent)
+	drainSch := schedule.New(srv, 10, false, srv.PublishBatch)
 
 	// Run the Drivers
 	go func() {
@@ -62,7 +61,6 @@ func main() {
 		}
 	}()
 
-	// genSch.Run()
 	batchSch.Run()
 	drainSch.Run()
 

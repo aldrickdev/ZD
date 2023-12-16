@@ -8,12 +8,13 @@ import (
 type service struct {
 	// Driven
 	q ports.UserEventQueue
+	b ports.Batch
 
 	// Core
 	z domain.ZendeskMock
 }
 
-func New(q ports.UserEventQueue, userServiceLocation, eventPath, userPath string) service {
+func New(q ports.UserEventQueue, b ports.Batch, userServiceLocation, eventPath, userPath string) service {
 	z := domain.NewZendeskMock(
 		userServiceLocation,
 		eventPath,
@@ -22,8 +23,40 @@ func New(q ports.UserEventQueue, userServiceLocation, eventPath, userPath string
 
 	return service{
 		q: q,
+		b: b,
 		z: z,
 	}
+}
+
+// Not sure if pointer is needed here
+func (s service) BatchUserEvent() error {
+	ue, err := s.z.GetUserEvent()
+	if err != nil {
+		return err
+	}
+
+	s.b.Add(ue)
+
+	return nil
+}
+
+func (s service) PublishBatch() error {
+	events := s.b.Drain()
+
+	err := s.q.PublishBatch(events)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s service) GenerateUserEvent() error {
+	_, err := s.z.GetUserEvent()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s service) GetUserEvent() (*domain.UserEvent, error) {

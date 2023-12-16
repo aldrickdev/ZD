@@ -85,6 +85,40 @@ func (r *RabbitMQ) Publish(ue domain.UserEvent) error {
 	return nil
 }
 
+func (r *RabbitMQ) PublishBatch(ue []*domain.UserEvent) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	events := []domain.UserEvent{}
+	for _, evt := range ue {
+		events = append(events, *evt)
+	}
+
+	fmt.Printf("Data being published: %v\n", events)
+
+	data, err := json.Marshal(events)
+	if err != nil {
+		return err
+	}
+
+	err = r.channel.PublishWithContext(
+		ctx,
+		r.ExchangeName,
+		"new.userevent", // Routing Key
+		false,           // mandatory
+		false,           // Immediate
+		amqp.Publishing{
+			ContentType: "application/json",
+			Body:        data,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (r *RabbitMQ) GracefulShutdown() {
 	fmt.Println("Closing Channel and Connection to RabbitMQ")
 	r.channel.Close()

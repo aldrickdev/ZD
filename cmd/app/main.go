@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"zd/envvars"
 	"zd/internal/core/service/zendeskservice"
+	"zd/internal/driven/batch"
 	"zd/internal/driven/rabbitmq"
 	"zd/internal/drivers/ginserver"
 	"zd/internal/drivers/schedule"
@@ -28,10 +29,12 @@ func main() {
 	)
 	queue.Connect(rmqConnectionString)
 	queue.DeclareExchange("zendesk", "topic")
+	batch := batch.New()
 
 	// Creating the Core Domain Service
 	srv := zendeskservice.New(
 		queue,
+		batch,
 		fmt.Sprintf("%s:%s", envvars.Env.USER_SRV_DOMAIN, envvars.Env.USER_SRV_PORT),
 		"/api/v1/event",
 		"/api/v1/user",
@@ -47,7 +50,8 @@ func main() {
 	server.GET("/", httpserver.GetUserEvent)
 
 	// 	 Schedule Driver
-	scheduler := schedule.New(srv, 50)
+	batchSch := schedule.New(srv, 3, true, srv.BatchUserEvent)
+	drainSch := schedule.New(srv, 10, false, srv.PublishBatch)
 
 	// Run the Drivers
 	go func() {
@@ -57,7 +61,8 @@ func main() {
 		}
 	}()
 
-	scheduler.Run()
+	batchSch.Run()
+	drainSch.Run()
 
 	// Starting Graceful Shutdown Channel
 	utils.GracefulShutdown([]utils.Closable{

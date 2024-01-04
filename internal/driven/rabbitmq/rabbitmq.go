@@ -10,10 +10,55 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-type RabbitMQ struct {
-	connect      *amqp.Connection
+type Route struct {
 	channel      *amqp.Channel
-	ExchangeName string
+	exchangeName string
+	key          string
+}
+
+func NewRoute(routingKey, exchangeName string, channel *amqp.Channel) Route {
+	return Route{
+		channel:      channel,
+		exchangeName: exchangeName,
+		key:          routingKey,
+	}
+}
+
+func (r Route) Publish(data any) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	fmt.Printf("Data being published: %v\n", data)
+	fmt.Printf("Published to Exchange: %s\n", r.exchangeName)
+
+	rawData, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	err = r.channel.PublishWithContext(
+		ctx,
+		r.exchangeName,
+		r.key, // Routing Key
+		false, // mandatory
+		false, // Immediate
+		amqp.Publishing{
+			ContentType: "application/json",
+			Body:        rawData,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type RabbitMQ struct {
+	connect        *amqp.Connection
+	channel        *amqp.Channel
+	exchangeName   string
+	ExchangeRoutes []Route
 }
 
 func New() *RabbitMQ {
@@ -51,8 +96,14 @@ func (r *RabbitMQ) DeclareExchange(exchangeName, exchangeType string) error {
 		return err
 	}
 
-	r.ExchangeName = exchangeName
+	r.exchangeName = exchangeName
 	return nil
+}
+
+func (r *RabbitMQ) RegisterExchangeRoute(routingKey string) {
+	newRoute := NewRoute(routingKey, r.exchangeName, r.channel)
+
+	r.ExchangeRoutes = append(r.ExchangeRoutes, newRoute)
 }
 
 func (r *RabbitMQ) Publish(ue domain.UserEvent) error {
@@ -60,7 +111,7 @@ func (r *RabbitMQ) Publish(ue domain.UserEvent) error {
 	defer cancel()
 
 	fmt.Printf("Data being published: %v\n", ue)
-	fmt.Printf("Published to Exchange: %s\n", r.ExchangeName)
+	fmt.Printf("Published to Exchange: %s\n", r.exchangeName)
 
 	data, err := json.Marshal(ue)
 	if err != nil {
@@ -69,10 +120,10 @@ func (r *RabbitMQ) Publish(ue domain.UserEvent) error {
 
 	err = r.channel.PublishWithContext(
 		ctx,
-		r.ExchangeName,
-		"new.userevent", // Routing Key
-		false,           // mandatory
-		false,           // Immediate
+		r.exchangeName,
+		"userevent", // Routing Key
+		false,       // mandatory
+		false,       // Immediate
 		amqp.Publishing{
 			ContentType: "application/json",
 			Body:        data,
@@ -103,10 +154,10 @@ func (r *RabbitMQ) PublishBatch(ue []*domain.UserEvent) error {
 
 	err = r.channel.PublishWithContext(
 		ctx,
-		r.ExchangeName,
-		"new.userevent", // Routing Key
-		false,           // mandatory
-		false,           // Immediate
+		r.exchangeName,
+		"marquee", // Routing Key
+		false,     // mandatory
+		false,     // Immediate
 		amqp.Publishing{
 			ContentType: "application/json",
 			Body:        data,

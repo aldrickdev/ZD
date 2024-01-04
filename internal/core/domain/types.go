@@ -14,3 +14,13 @@ type UserEvent struct {
 	UserID  uint `json:"user_id"`
 	EventID uint `json:"event_id"`
 }
+
+type UserEventData struct {
+	UserID  uint `json:"user_id"`
+	EventID uint `json:"event_id"`
+}
+
+type MarqueeData struct {
+	UserName  string `json:"user_name"`
+	EventName string `json:"event_name"`
+}

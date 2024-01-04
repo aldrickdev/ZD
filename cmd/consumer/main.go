@@ -42,7 +42,7 @@ func main() {
 	)
 	checkError(err, "Failed to declare a queue")
 
-	routing_key := "new.userevent"
+	routing_key := "marquee"
 	err = ch.QueueBind(
 		q.Name,      // queue name
 		routing_key, // routing key

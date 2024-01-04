@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"zd/envvars"
 	"zd/internal/core/service/zendeskservice"
 	"zd/internal/driven/batch"
@@ -19,7 +20,7 @@ func init() {
 
 func main() {
 	// Creating and Configuring the RabbitMQ Driven Actor
-	queue := rabbitmq.New()
+	rabbitMQ := rabbitmq.New()
 	rmqConnectionString := fmt.Sprintf(
 		"amqp://%s:%s@%s:%s",
 		envvars.Env.RMQ_USER,
@@ -27,13 +28,21 @@ func main() {
 		envvars.Env.RMQ_DOMAIN,
 		envvars.Env.RMQ_PORT,
 	)
-	queue.Connect(rmqConnectionString)
-	queue.DeclareExchange("zendesk", "topic")
+	fmt.Printf("Connection String for RabbitMQ: %s\n", rmqConnectionString)
+	err := rabbitMQ.Connect(rmqConnectionString)
+	if err != nil {
+		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
+	}
+	err = rabbitMQ.DeclareExchange("zendesk", "topic")
+	if err != nil {
+		log.Fatalf("Failed to decalre an exchange: %v", err)
+	}
+
 	batch := batch.New()
 
 	// Creating the Core Domain Service
 	srv := zendeskservice.New(
-		queue,
+		rabbitMQ,
 		batch,
 		fmt.Sprintf("%s:%s", envvars.Env.USER_SRV_DOMAIN, envvars.Env.USER_SRV_PORT),
 		"/api/v1/event",
@@ -49,11 +58,11 @@ func main() {
 	server := gin.Default()
 	server.GET("/", httpserver.GetUserEvent)
 
-	// 	 Schedule Driver
-	batchSch := schedule.New(srv, 3, true, srv.BatchUserEvent)
+	// 	 Scheduler Driver
+	generateUserEventSchedule := schedule.New(srv, 3, true, srv.GenerateUserEvent)
 	drainSch := schedule.New(srv, 10, false, srv.PublishBatch)
 
-	// Run the Drivers
+	// Run all of the Drivers
 	go func() {
 		err := server.Run(envvars.Env.HTTP_PORT)
 		if err != nil {
@@ -61,12 +70,12 @@ func main() {
 		}
 	}()
 
-	batchSch.Run()
+	generateUserEventSchedule.Run()
 	drainSch.Run()
 
 	// Starting Graceful Shutdown Channel
 	utils.GracefulShutdown([]utils.Closable{
-		queue,
+		rabbitMQ,
 	})
 
 	// Loop to prevent main routine from stopping

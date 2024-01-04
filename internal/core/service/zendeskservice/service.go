@@ -28,7 +28,6 @@ func New(q ports.UserEventQueue, b ports.Batch, userServiceLocation, eventPath, 
 	}
 }
 
-// Not sure if pointer is needed here
 func (s service) BatchUserEvent() error {
 	ue, err := s.z.GetUserEvent()
 	if err != nil {
@@ -52,10 +51,18 @@ func (s service) PublishBatch() error {
 }
 
 func (s service) GenerateUserEvent() error {
-	_, err := s.z.GetUserEvent()
+	ue, err := s.z.GetUserEvent()
 	if err != nil {
 		return err
 	}
+
+	s.b.Add(ue)
+
+	err = s.q.Publish(*ue)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

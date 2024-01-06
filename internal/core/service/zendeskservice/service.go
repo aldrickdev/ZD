@@ -1,17 +1,23 @@
 package zendeskservice
 
 import (
+	"fmt"
 	"zd/internal/core/domain"
 	"zd/internal/core/ports"
 )
 
-type service struct {
-	// Driven
-	q ports.UserEventQueue
-	b ports.Batch
+const (
+	CallbackTypeImmediate = "CALLBACK_TYPE_IMMEDIATE"
+	CallbackTypeLatest    = "CALLBACK_TYPE_LATEST"
+)
 
-	// Core
-	z domain.ZendeskMock
+type service struct {
+	q                         ports.UserEventQueue
+	b                         ports.Batch
+	z                         domain.ZendeskMock
+	publishingCallbacks       []func(domain.FullUserEvent) error
+	latestPublishingCallbacks []func(domain.FullUserEvent) error
+	latestFullUserEvent       domain.FullUserEvent
 }
 
 func New(q ports.UserEventQueue, b ports.Batch, userServiceLocation, eventPath, userPath string) service {
@@ -66,6 +72,31 @@ func (s service) GenerateUserEvent() error {
 	return nil
 }
 
+func (s *service) PublishNewUserEvent() error {
+	fmt.Println("New")
+	ue, err := s.z.GetFullUserEvent()
+	if err != nil {
+		return err
+	}
+
+	s.latestFullUserEvent = *ue
+
+	for _, callback := range s.publishingCallbacks {
+		callback(*ue)
+	}
+
+	return nil
+}
+
+func (s *service) PublishLatestUserEvent() error {
+	fmt.Println("Latest")
+	for _, callback := range s.latestPublishingCallbacks {
+		callback(s.latestFullUserEvent)
+	}
+
+	return nil
+}
+
 func (s service) GetUserEvent() (*domain.UserEvent, error) {
 	ue, err := s.z.GetUserEvent()
 	if err != nil {
@@ -77,4 +108,14 @@ func (s service) GetUserEvent() (*domain.UserEvent, error) {
 		return nil, err
 	}
 	return ue, nil
+}
+
+func (s *service) RegisterPublishingCallback(callback func(domain.FullUserEvent) error, callbackType string) {
+	switch callbackType {
+	case CallbackTypeImmediate:
+		s.publishingCallbacks = append(s.publishingCallbacks, callback)
+
+	case CallbackTypeLatest:
+		s.latestPublishingCallbacks = append(s.latestPublishingCallbacks, callback)
+	}
 }

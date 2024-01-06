@@ -10,30 +10,62 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
+const (
+	RouteTypeUserEventIDData   = "USER_EVENT_ID_DATA"
+	RouteTypeUserEventNameData = "USER_EVENT_NAME_DATA"
+)
+
 type Route struct {
 	channel      *amqp.Channel
 	exchangeName string
 	key          string
+	routeType    string
 }
 
-func NewRoute(routingKey, exchangeName string, channel *amqp.Channel) Route {
+func NewRoute(routingKey, routeDataType, exchangeName string, channel *amqp.Channel) Route {
 	return Route{
 		channel:      channel,
 		exchangeName: exchangeName,
 		key:          routingKey,
+		routeType:    routeDataType,
 	}
 }
 
-func (r Route) Publish(data any) error {
+func (r Route) Publish(data domain.FullUserEvent) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	fmt.Printf("Data being published: %v\n", data)
 	fmt.Printf("Published to Exchange: %s\n", r.exchangeName)
 
-	rawData, err := json.Marshal(data)
-	if err != nil {
-		return err
+	var rawData []byte
+	var err error
+
+	switch r.routeType {
+	case RouteTypeUserEventIDData:
+		refinedData := domain.UserEventIDData{
+			UserID:  data.User.ID,
+			EventID: data.Event.ID,
+		}
+
+		rawData, err = json.Marshal(refinedData)
+		if err != nil {
+			return err
+		}
+
+	case RouteTypeUserEventNameData:
+		refinedData := domain.UserEventNameData{
+			UserName:  data.User.Name,
+			EventName: data.Event.Name,
+		}
+
+		rawData, err = json.Marshal(refinedData)
+		if err != nil {
+			return err
+		}
+
+	default:
+		return fmt.Errorf("invalid route type: %s", r.routeType)
 	}
 
 	err = r.channel.PublishWithContext(
@@ -58,11 +90,13 @@ type RabbitMQ struct {
 	connect        *amqp.Connection
 	channel        *amqp.Channel
 	exchangeName   string
-	ExchangeRoutes []Route
+	ExchangeRoutes map[string]Route
 }
 
 func New() *RabbitMQ {
-	return &RabbitMQ{}
+	return &RabbitMQ{
+		ExchangeRoutes: map[string]Route{},
+	}
 }
 
 func (r *RabbitMQ) Connect(connectionString string) error {
@@ -100,10 +134,11 @@ func (r *RabbitMQ) DeclareExchange(exchangeName, exchangeType string) error {
 	return nil
 }
 
-func (r *RabbitMQ) RegisterExchangeRoute(routingKey string) {
-	newRoute := NewRoute(routingKey, r.exchangeName, r.channel)
+func (r *RabbitMQ) RegisterExchangeRoute(routingKey, dataType string) Route {
+	newRoute := NewRoute(routingKey, dataType, r.exchangeName, r.channel)
+	r.ExchangeRoutes[routingKey] = newRoute
 
-	r.ExchangeRoutes = append(r.ExchangeRoutes, newRoute)
+	return newRoute
 }
 
 func (r *RabbitMQ) Publish(ue domain.UserEvent) error {

@@ -37,6 +37,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to decalre an exchange: %v", err)
 	}
+	userEventIDRoute := rabbitMQ.RegisterExchangeRoute("userevent", rabbitmq.RouteTypeUserEventIDData)
+	userEventNameRoute := rabbitMQ.RegisterExchangeRoute("marquee", rabbitmq.RouteTypeUserEventNameData)
 
 	batch := batch.New()
 
@@ -48,6 +50,8 @@ func main() {
 		"/api/v1/event",
 		"/api/v1/user",
 	)
+	srv.RegisterPublishingCallback(userEventIDRoute.Publish, zendeskservice.CallbackTypeImmediate)
+	srv.RegisterPublishingCallback(userEventNameRoute.Publish, zendeskservice.CallbackTypeLatest)
 
 	// Creating and Configuring the Driver Actors
 	//   HTTP Driver
@@ -58,9 +62,9 @@ func main() {
 	server := gin.Default()
 	server.GET("/", httpserver.GetUserEvent)
 
-	// 	 Scheduler Driver
-	generateUserEventSchedule := schedule.New(srv, 3, true, srv.GenerateUserEvent)
-	drainSch := schedule.New(srv, 10, false, srv.PublishBatch)
+	//   Creating Schedules
+	userEventIDScheduler := schedule.New(srv, 3, true, srv.PublishNewUserEvent)
+	userEventNameScheduler := schedule.New(srv, 10, false, srv.PublishLatestUserEvent)
 
 	// Run all of the Drivers
 	go func() {
@@ -70,8 +74,8 @@ func main() {
 		}
 	}()
 
-	generateUserEventSchedule.Run()
-	drainSch.Run()
+	userEventIDScheduler.Run()
+	userEventNameScheduler.Run()
 
 	// Starting Graceful Shutdown Channel
 	utils.GracefulShutdown([]utils.Closable{

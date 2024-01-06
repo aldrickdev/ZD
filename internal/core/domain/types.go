@@ -15,12 +15,16 @@ type UserEvent struct {
 	EventID uint `json:"event_id"`
 }
 
-type UserEventData struct {
+type FullUserEvent struct {
+	User  User
+	Event Event
+}
+type UserEventIDData struct {
 	UserID  uint `json:"user_id"`
 	EventID uint `json:"event_id"`
 }
 
-type MarqueeData struct {
+type UserEventNameData struct {
 	UserName  string `json:"user_name"`
 	EventName string `json:"event_name"`
 }

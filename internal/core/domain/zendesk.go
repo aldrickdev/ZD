@@ -47,6 +47,32 @@ func (z ZendeskMock) GetUserEvent() (*UserEvent, error) {
 		EventID: randomEvent.ID,
 	}, nil
 }
+
+func (z ZendeskMock) GetFullUserEvent() (*FullUserEvent, error) {
+	users, err := z.getAvailableUsers()
+	if err != nil {
+		return nil, fmt.Errorf("error while getting all available users: %s", err)
+	}
+	if len(users) == 0 {
+		return nil, nil
+	}
+
+	events, err := z.getAvailableEvents()
+	if err != nil {
+		return nil, fmt.Errorf("error while getting all available events: %s", err)
+	}
+	if len(events) == 0 {
+		return nil, nil
+	}
+
+	randomUser := randomSelection(users)
+	randomEvent := randomSelection(events)
+
+	return &FullUserEvent{
+		User:  randomUser,
+		Event: randomEvent,
+	}, nil
+}
 func (z ZendeskMock) getAvailableEvents() ([]Event, error) {
 	// "http://localhost:4001/api/v1/event",
 	requestURL := fmt.Sprintf(

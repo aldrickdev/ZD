@@ -1,6 +1,8 @@
 package main
 
 import (
+	"zd/internal/utils"
+
 	"github.com/labstack/echo"
 )
 
@@ -131,6 +133,10 @@ type Event struct {
 	Points uint   `json:"points"`
 }
 
+func init() {
+	utils.LoadEnvVars()
+}
+
 func main() {
 	apiServer := echo.New()
 	apiServer.GET("/api/v2/users", func(c echo.Context) error {
@@ -140,5 +146,5 @@ func main() {
 	apiServer.GET("/api/v2/events", func(c echo.Context) error {
 		return c.JSON(200, MockDB.Events)
 	})
-	apiServer.Start(":4001")
+	apiServer.Logger.Fatal(apiServer.Start(utils.Env.USER_SRV_PORT))
 }

@@ -15,22 +15,23 @@ Once you have provided the environment variables, open the `Command Palette`, ty
 Some key tools that were installed into this Devcontainer are:
 
 - [Golang v1.21](https://github.com/devcontainers/images/tree/main/src/go)
-- [NodeJS v18](https://github.com/devcontainers/features/tree/main/src/node)
 - [Task](https://github.com/eitsupi/devcontainer-features/tree/main/src/go-task)
-- [JSON Server](https://www.npmjs.com/package/json-server)
-- [Air](https://github.com/cosmtrek/air/tree/master)
 
 ## Running the Zendesk Service
 
 Before continuing, make sure that you are in VSCode, have a remote connection to the Devcontainer and are in the `/workspaces` directory. Getting a remote connection to the Devcontainer is covered in section [Using the Devcontainer](#using-the-devcontainer).
 
-The application has a dependency on the User Service which currently, is responsible for providing all available users and event data. Currently, the User Service is under development so to mock this User Service, we are using [JSON Server](https://www.npmjs.com/package/json-server). 
+The application has a dependency on the User Service which currently, is responsible for providing all available users and event data. To mock the User Service, there is a small application in `cmd/mockUserService`.
 
 To run the Mocked User Service, run the command below, this will startup the Mocked User Service locally so that the Zendesk Service can get the required data for it to run.
 
 ``` bash
 task run-us
 ```
+
+Additionally, the application relies on RabbitMQ as a message broker to provide send message to the consumers of the user events. To make starting a RabbitMQ Broker easier, you can run the `rabbitmq.sh` script locally so that docker can spin up an instance. 
+
+**Note, make sure to add values for the RABBITMQ_DEFAULT_USER and RABBITMQ_DEFAULT_PASS**, this should be the values set in the `.env` file.
 
 To run the Zendesk Service, run the command below. This will run the Zendesk Service locally.
 

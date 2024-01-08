@@ -7,7 +7,7 @@
   //
   // devcontainer Environment Configuration ===
   "remoteUser": "vscode",
-  // "forwardPorts": [], vscode forwards the ports automatically anyways
+  "forwardPorts": [], // vscode forwards the ports automatically anyways
   // List of available features: https://github.com/devcontainers/features/tree/main/src
   "features": {
     // https://github.com/eitsupi/devcontainer-features/tree/main/src/go-task

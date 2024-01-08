@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
-	"zd/internal/core/domain"
+	"zd/internal/core"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -31,20 +31,24 @@ func NewRoute(routingKey, routeDataType, exchangeName string, channel *amqp.Chan
 	}
 }
 
-func (r Route) Publish(data domain.FullUserEvent) error {
+func (r Route) Publish(data *core.FullUserEvent) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	fmt.Printf("Data being published: %v\n", data)
-	fmt.Printf("Published to Exchange: %s\n", r.exchangeName)
+	if data == nil {
+		fmt.Println("No Data to publish")
+		return nil
+	}
+
+	fmt.Printf("Data being published: %+v\n", data)
 
 	var rawData []byte
 	var err error
 
 	switch r.routeType {
 	case RouteTypeUserEventIDData:
-		refinedData := domain.UserEventIDData{
-			UserID:  data.User.ID,
+		refinedData := core.UserEventIDData{
+			UserID:  data.User.Id,
 			EventID: data.Event.ID,
 		}
 
@@ -54,7 +58,7 @@ func (r Route) Publish(data domain.FullUserEvent) error {
 		}
 
 	case RouteTypeUserEventNameData:
-		refinedData := domain.UserEventNameData{
+		refinedData := core.UserEventNameData{
 			UserName:  data.User.Name,
 			EventName: data.Event.Name,
 		}
@@ -141,68 +145,98 @@ func (r *RabbitMQ) RegisterExchangeRoute(routingKey, dataType string) Route {
 	return newRoute
 }
 
-func (r *RabbitMQ) Publish(ue domain.UserEvent) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+// func (r *RabbitMQ) Publish(ue core.UserEvent) error {
+// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+// 	defer cancel()
 
-	fmt.Printf("Data being published: %v\n", ue)
-	fmt.Printf("Published to Exchange: %s\n", r.exchangeName)
+// 	fmt.Printf("Data being published: %v\n", ue)
 
-	data, err := json.Marshal(ue)
-	if err != nil {
-		return err
-	}
+// 	data, err := json.Marshal(ue)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	err = r.channel.PublishWithContext(
-		ctx,
-		r.exchangeName,
-		"userevent", // Routing Key
-		false,       // mandatory
-		false,       // Immediate
-		amqp.Publishing{
-			ContentType: "application/json",
-			Body:        data,
-		},
+// 	err = r.channel.PublishWithContext(
+// 		ctx,
+// 		r.exchangeName,
+// 		"userevent", // Routing Key
+// 		false,       // mandatory
+// 		false,       // Immediate
+// 		amqp.Publishing{
+// 			ContentType: "application/json",
+// 			Body:        data,
+// 		},
+// 	)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }
+
+// func (r *RabbitMQ) PublishBatch(ue []*core.UserEvent) error {
+// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+// 	defer cancel()
+
+// 	events := []core.UserEvent{}
+// 	for _, evt := range ue {
+// 		events = append(events, *evt)
+// 	}
+
+// 	data, err := json.Marshal(events)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	err = r.channel.PublishWithContext(
+// 		ctx,
+// 		r.exchangeName,
+// 		"marquee", // Routing Key
+// 		false,     // mandatory
+// 		false,     // Immediate
+// 		amqp.Publishing{
+// 			ContentType: "application/json",
+// 			Body:        data,
+// 		},
+// 	)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }
+
+func (r *RabbitMQ) DeclareQueue() (amqp.Queue, error) {
+	return r.channel.QueueDeclare(
+		"",    // Queue Name
+		false, // durable
+		false, // delete when unused
+		true,  // exclusive
+		false, // no-wait
+		nil,   // arguments
 	)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
-func (r *RabbitMQ) PublishBatch(ue []*domain.UserEvent) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	events := []domain.UserEvent{}
-	for _, evt := range ue {
-		events = append(events, *evt)
-	}
-
-	fmt.Printf("Data being published: %v\n", events)
-
-	data, err := json.Marshal(events)
-	if err != nil {
-		return err
-	}
-
-	err = r.channel.PublishWithContext(
-		ctx,
-		r.exchangeName,
-		"marquee", // Routing Key
-		false,     // mandatory
-		false,     // Immediate
-		amqp.Publishing{
-			ContentType: "application/json",
-			Body:        data,
-		},
+func (r *RabbitMQ) QueueBind(queue amqp.Queue, routingKey string) error {
+	return r.channel.QueueBind(
+		queue.Name,     // queue name
+		routingKey,     // routing key
+		r.exchangeName, //exchange
+		false,          // no wait
+		nil,
 	)
-	if err != nil {
-		return err
-	}
+}
 
-	return nil
+func (r *RabbitMQ) ConsumeQueue(queueName string) (<-chan amqp.Delivery, error) {
+	return r.channel.Consume(
+		queueName, // Queue
+		"",        // consumer
+		true,      // auto-ack
+		false,     // exclusive
+		false,     // no-local
+		false,     // no-wait
+		nil,       // args
+	)
 }
 
 func (r *RabbitMQ) GracefulShutdown() {

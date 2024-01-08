@@ -1,26 +1,23 @@
-package schedule
+package scheduler
 
 import (
 	"math/rand"
 	"time"
-	"zd/internal/core/ports"
 )
 
 type ScheduledFunc func() error
 
 type Schedule struct {
-	zendeskService ports.ZendeskService
-	maxInterval    int
-	random         bool
-	fn             ScheduledFunc
+	maxInterval int
+	random      bool
+	fn          ScheduledFunc
 }
 
-func New(zs ports.ZendeskService, mi int, isRandom bool, fn ScheduledFunc) *Schedule {
+func New(mi int, isRandom bool, fn ScheduledFunc) *Schedule {
 	return &Schedule{
-		zendeskService: zs,
-		maxInterval:    mi,
-		random:         isRandom,
-		fn:             fn,
+		maxInterval: mi,
+		random:      isRandom,
+		fn:          fn,
 	}
 }
 

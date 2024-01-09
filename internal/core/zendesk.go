@@ -21,31 +21,6 @@ func NewZendeskMock(userServiceLocation, eventPath, userPath string) ZendeskMock
 		userPath:            userPath,
 	}
 }
-func (z ZendeskMock) GetUserEvent() (*UserEvent, error) {
-	users, err := z.getAvailableUsers()
-	if err != nil {
-		return nil, fmt.Errorf("error while getting all available users: %s", err)
-	}
-	if len(users) == 0 {
-		return nil, nil
-	}
-
-	events, err := z.getAvailableEvents()
-	if err != nil {
-		return nil, fmt.Errorf("error while getting all available events: %s", err)
-	}
-	if len(events) == 0 {
-		return nil, nil
-	}
-
-	randomUser := randomSelection(users)
-	randomEvent := randomSelection(events)
-
-	return &UserEvent{
-		UserID:  randomUser.Id,
-		EventID: randomEvent.ID,
-	}, nil
-}
 func (z ZendeskMock) GetFullUserEvent() (*FullUserEvent, error) {
 	users, err := z.getAvailableUsers()
 	if err != nil {

@@ -12,13 +12,13 @@ const (
 
 type service struct {
 	// Dependencies
-	queue               dependencies.QueueBroker
-	zendeskMock         core.ZendeskMock
-	latestFullUserEvent *core.FullUserEvent
+	queue dependencies.QueueBroker
+	core  dependencies.Core
 
-	// Callbacks
+	// Callback Store
 	publishingCallbacks       []func(*core.FullUserEvent) error
 	latestPublishingCallbacks []func(*core.FullUserEvent) error
+	latestFullUserEvent       *core.FullUserEvent
 }
 
 func New(queueBroker dependencies.QueueBroker, userServiceLocation, eventPath, userPath string) service {
@@ -29,13 +29,13 @@ func New(queueBroker dependencies.QueueBroker, userServiceLocation, eventPath, u
 	)
 
 	return service{
-		queue:       queueBroker,
-		zendeskMock: z,
+		queue: queueBroker,
+		core:  z,
 	}
 }
 
 func (s *service) PublishNewUserEvent() error {
-	ue, err := s.zendeskMock.GetFullUserEvent()
+	ue, err := s.core.GetFullUserEvent()
 	if err != nil {
 		return err
 	}

@@ -1,66 +1,54 @@
 package main
 
 import (
+	"fmt"
 	"log"
-
-	amqp "github.com/rabbitmq/amqp091-go"
+	"os"
+	"zd/internal/rabbitmq"
+	"zd/internal/utils"
 )
 
 func checkError(err error, msg string) {
 	if err != nil {
-		log.Panicf("%s: %s", msg, err)
+		log.Panicf("%s: %q", msg, err)
 	}
 }
 
+func init() {
+	// Load the environment variables
+	utils.LoadEnvVars()
+}
+
 func main() {
-	conn, err := amqp.Dial("amqp://admin:admin@broker:5672")
-	checkError(err, "Failed to connect to RabbitMQ")
-	defer conn.Close()
+	arguments := os.Args[1:]
+	if len(arguments) != 1 {
+		log.Fatal("You need to provide just one parameter, the name of the exchange routing key you would like to bind too. examples (marquee, userevent)")
+	}
 
-	ch, err := conn.Channel()
-	checkError(err, "Failed to open a channel")
-	defer ch.Close()
+	routingKey := arguments[0]
 
-	err = ch.ExchangeDeclare(
-		"zendesk", // name
-		"topic",   // type
-		true,      //durable
-		false,     // auto-deleted
-		false,     // internal
-		false,     // no-wait
-		nil,       // arguments
+	// Create and configure the RabbitMQ instance ===
+	rabbitMQ := rabbitmq.New()
+	rmqConnectionString := fmt.Sprintf(
+		"amqp://%s:%s@%s:%s",
+		utils.Env.RMQ_USER,
+		utils.Env.RMQ_PASS,
+		utils.Env.RMQ_DOMAIN,
+		utils.Env.RMQ_PORT,
 	)
+	err := rabbitMQ.Connect(rmqConnectionString)
+	checkError(err, "Failed to connect to RabbitMQ")
+
+	err = rabbitMQ.DeclareExchange("zendesk", "topic")
 	checkError(err, "Failed to declare an exchange")
 
-	q, err := ch.QueueDeclare(
-		"",    // Queue Name
-		false, // durable
-		false, // delete when unused
-		true,  // exclusive
-		false, // no-wait
-		nil,   // arguments
-	)
+	queue, err := rabbitMQ.DeclareQueue()
 	checkError(err, "Failed to declare a queue")
 
-	routing_key := "new.userevent"
-	err = ch.QueueBind(
-		q.Name,      // queue name
-		routing_key, // routing key
-		"zendesk",   //exchange
-		false,
-		nil,
-	)
+	err = rabbitMQ.QueueBind(queue, routingKey)
 	checkError(err, "Failed to bind a queue")
 
-	msgs, err := ch.Consume(
-		q.Name, // Queue
-		"",     // consumer
-		true,   // auto-ack
-		false,  // exclusive
-		false,  // no-local
-		false,  // no-wait
-		nil,    // args
-	)
+	msgs, err := rabbitMQ.ConsumeQueue(queue.Name)
 	checkError(err, "Failed to register a consumer")
 
 	var forever chan struct{}

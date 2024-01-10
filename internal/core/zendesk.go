@@ -1,4 +1,4 @@
-package domain
+package core
 
 import (
 	"encoding/json"
@@ -21,8 +21,7 @@ func NewZendeskMock(userServiceLocation, eventPath, userPath string) ZendeskMock
 		userPath:            userPath,
 	}
 }
-
-func (z ZendeskMock) GetUserEvent() (*UserEvent, error) {
+func (z ZendeskMock) GetFullUserEvent() (*FullUserEvent, error) {
 	users, err := z.getAvailableUsers()
 	if err != nil {
 		return nil, fmt.Errorf("error while getting all available users: %s", err)
@@ -42,13 +41,13 @@ func (z ZendeskMock) GetUserEvent() (*UserEvent, error) {
 	randomUser := randomSelection(users)
 	randomEvent := randomSelection(events)
 
-	return &UserEvent{
-		UserID:  randomUser.ID,
-		EventID: randomEvent.ID,
+	return &FullUserEvent{
+		User:  randomUser,
+		Event: randomEvent,
 	}, nil
 }
 func (z ZendeskMock) getAvailableEvents() ([]Event, error) {
-	// "http://localhost:4001/api/v1/event",
+
 	requestURL := fmt.Sprintf(
 		"http://%s%s",
 		z.userServiceLocation,
@@ -68,7 +67,6 @@ func (z ZendeskMock) getAvailableEvents() ([]Event, error) {
 	return events, nil
 }
 func (z ZendeskMock) getAvailableUsers() ([]User, error) {
-	// "http://localhost:4001/api/v1/user"
 	requestURL := fmt.Sprintf(
 		"http://%s%s",
 		z.userServiceLocation,
@@ -82,12 +80,12 @@ func (z ZendeskMock) getAvailableUsers() ([]User, error) {
 	users := []User{}
 	err = json.Unmarshal(data, &users)
 	if err != nil {
+		fmt.Printf("Error Here: %q\n", err)
 		return nil, fmt.Errorf("error unmarshaling json: %s", err)
 	}
 
 	return users, nil
 }
-
 func randomSelection[O User | Event](obj []O) O {
 	randomNumberGenerator := rand.New(rand.NewSource(time.Now().Unix()))
 	lastIndex := len(obj) - 1

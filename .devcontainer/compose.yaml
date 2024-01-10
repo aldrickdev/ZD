@@ -16,16 +16,17 @@ services:
       - RMQ_DOMAIN=${RMQ_DOMAIN}
       - RMQ_PORT=${RMQ_PORT}
 
-
     volumes:
       - ..:/workspaces:cached
 
     command: sleep infinity
 
-  broker:
-    hostname: wabbit
-    image: rabbitmq:3.12.8
+    network_mode: "host"
 
-    environment:
-      - RABBITMQ_DEFAULT_USER=${RMQ_USER}
-      - RABBITMQ_DEFAULT_PASS=${RMQ_PASS}
+  # broker:
+  #   hostname: wabbit
+  #   image: rabbitmq:3.12.11-management
+
+  #   environment:
+  #     - RABBITMQ_DEFAULT_USER=${RMQ_USER}
+  #     - RABBITMQ_DEFAULT_PASS=${RMQ_PASS}

@@ -22,10 +22,9 @@ tasks:
   run-con:
     dir: cmd/consumer
     cmds:
-      - go run main.go
-  
-  run-us:
-    dir: mockUserService
-    cmds:
-      - json-server --config json-server.json --routes routes.json --watch db.json
+      - go run main.go {{.CLI_ARGS}}
 
+  run-us:
+    dir: cmd/mockUserService
+    cmds:
+      - go run main.go

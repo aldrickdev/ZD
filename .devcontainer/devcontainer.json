@@ -7,15 +7,11 @@
   //
   // devcontainer Environment Configuration ===
   "remoteUser": "vscode",
-  // "forwardPorts": [], vscode forwards the ports automatically anyways
+  "forwardPorts": [], // vscode forwards the ports automatically anyways
   // List of available features: https://github.com/devcontainers/features/tree/main/src
   "features": {
     // https://github.com/eitsupi/devcontainer-features/tree/main/src/go-task
-    "ghcr.io/eitsupi/devcontainer-features/go-task:1": {},
-    // https://github.com/devcontainers/features/tree/main/src/node
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "18"
-    }
+    "ghcr.io/eitsupi/devcontainer-features/go-task:1": {}
   },
   "customizations": {
     "vscode": {

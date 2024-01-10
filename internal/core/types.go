@@ -12,22 +12,22 @@ type Pod struct {
 	Points uint   `json:"points"`
 }
 type Event struct {
-	ID     uint   `json:"id"`
+	Id     uint   `json:"id"`
 	Name   string `json:"name"`
 	Points uint   `json:"points"`
 }
 type UserEvent struct {
-	UserID  uint `json:"user_id"`
-	EventID uint `json:"event_id"`
+	UserId  uint `json:"user_id"`
+	EventId uint `json:"event_id"`
 }
 
 type FullUserEvent struct {
 	User  User
 	Event Event
 }
-type UserEventIDData struct {
-	UserID  uint `json:"user_id"`
-	EventID uint `json:"event_id"`
+type UserEventIdData struct {
+	UserId  uint `json:"user_id"`
+	EventId uint `json:"event_id"`
 }
 
 type UserEventNameData struct {

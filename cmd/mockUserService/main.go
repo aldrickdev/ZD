@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"zd/internal/utils"
 
 	"github.com/labstack/echo"
@@ -146,5 +147,5 @@ func main() {
 	apiServer.GET("/api/v2/events", func(c echo.Context) error {
 		return c.JSON(200, MockDB.Events)
 	})
-	apiServer.Logger.Fatal(apiServer.Start(utils.Env.USER_SRV_PORT))
+	apiServer.Logger.Fatal(apiServer.Start(fmt.Sprintf(":%s", utils.Env.USER_SRV_PORT)))
 }

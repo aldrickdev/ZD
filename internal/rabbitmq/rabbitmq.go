@@ -47,9 +47,9 @@ func (r Route) Publish(data *core.FullUserEvent) error {
 
 	switch r.routeType {
 	case RouteTypeUserEventIDData:
-		refinedData := core.UserEventIDData{
-			UserID:  data.User.Id,
-			EventID: data.Event.ID,
+		refinedData := core.UserEventIdData{
+			UserId:  data.User.Id,
+			EventId: data.Event.Id,
 		}
 
 		rawData, err = json.Marshal(refinedData)
@@ -124,7 +124,7 @@ func (r *RabbitMQ) DeclareExchange(exchangeName, exchangeType string) error {
 	err := r.channel.ExchangeDeclare(
 		exchangeName, // Exchange Name
 		exchangeType, // Exchange Type
-		true,         // Durable
+		false,        // Durable
 		false,        // auto-delete
 		false,        // internal
 		false,        // no-wait
@@ -144,67 +144,6 @@ func (r *RabbitMQ) RegisterExchangeRoute(routingKey, dataType string) Route {
 
 	return newRoute
 }
-
-// func (r *RabbitMQ) Publish(ue core.UserEvent) error {
-// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-// 	defer cancel()
-
-// 	fmt.Printf("Data being published: %v\n", ue)
-
-// 	data, err := json.Marshal(ue)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	err = r.channel.PublishWithContext(
-// 		ctx,
-// 		r.exchangeName,
-// 		"userevent", // Routing Key
-// 		false,       // mandatory
-// 		false,       // Immediate
-// 		amqp.Publishing{
-// 			ContentType: "application/json",
-// 			Body:        data,
-// 		},
-// 	)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
-// func (r *RabbitMQ) PublishBatch(ue []*core.UserEvent) error {
-// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-// 	defer cancel()
-
-// 	events := []core.UserEvent{}
-// 	for _, evt := range ue {
-// 		events = append(events, *evt)
-// 	}
-
-// 	data, err := json.Marshal(events)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	err = r.channel.PublishWithContext(
-// 		ctx,
-// 		r.exchangeName,
-// 		"marquee", // Routing Key
-// 		false,     // mandatory
-// 		false,     // Immediate
-// 		amqp.Publishing{
-// 			ContentType: "application/json",
-// 			Body:        data,
-// 		},
-// 	)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }
 
 func (r *RabbitMQ) DeclareQueue() (amqp.Queue, error) {
 	return r.channel.QueueDeclare(

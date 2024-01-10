@@ -43,7 +43,8 @@ func (s *service) PublishNewUserEvent() error {
 	s.latestFullUserEvent = ue
 
 	for _, callback := range s.publishingCallbacks {
-		callback(ue)
+		err := callback(ue)
+		return err
 	}
 
 	return nil
@@ -51,7 +52,8 @@ func (s *service) PublishNewUserEvent() error {
 
 func (s *service) PublishLatestUserEvent() error {
 	for _, callback := range s.latestPublishingCallbacks {
-		callback(s.latestFullUserEvent)
+		err := callback(s.latestFullUserEvent)
+		return err
 	}
 
 	return nil

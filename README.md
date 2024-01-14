@@ -16,18 +16,24 @@ To run this service you will need to have Golang version 1.21. When it comes to 
 
 Once your RabbitMQ instance is running, start up the [pd-users-api](https://github.com/TSE-Coders/pd-users-api) service by following it's documentation. 
 
-Now before starting up this service, you will need to set some environment variables, the list of the required variables can be found in the file [.env.example](./.env.example). 
+Before starting up this service, you will need to set some environment variables, the list of the required variables can be found in the file [.env.example](./.env.example). 
 
 Now that the required services and the environment variables are set, you can run this service. 
 
-To start the service go to the app directory:
+To start, go to the [zd](./cmd/zd) directory:
 
 ``` bash
-cd cmd/app
+cd cmd/zd
+```
+
+Build the Go binary:
+
+``` bash
+go build -o build/zd -buildvcs=false
 ```
 
 Run the application:
 
 ``` bash
-go run main.go
+./build/zd
 ```

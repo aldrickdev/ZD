@@ -1,21 +1,19 @@
 # https://taskfile.dev
 version: '3'
 
-vars:
-
 tasks:
   build-zd:
-    dir: cmd/app
+    dir: cmd/zd
     cmds:
-      - go build -o main -buildvcs=false
+      - go build -o build/zd -buildvcs=false
 
   run-zd:
-    dir: cmd/app
+    dir: cmd/zd
     cmds:
       - go run main.go
 
   run-zd-dev:
-    dir: cmd/app
+    dir: cmd/zd
     cmds:
       - air
   

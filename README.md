@@ -2,49 +2,32 @@
 
 This is the Zendesk Service that is responsible for producing User Events.
 
-This project makes use of [Microsoft Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers). This allows you to create reproducible development environments for all developers working on this project. The only requirements are [Docker](https://www.docker.com/), [Visual Studio Code](https://code.visualstudio.com/) and the **Dev Containers VSCode Extension**.
+## Running ZD
 
-![devcontainer extension](docs/images/devcontainer-extension.jpg)
+### Service Dependencies
 
-## Using the Devcontainer
+This service depends on 2 other's, one would be a service that provides user and event data as this is needed to generate random user events. The second required service is an event queue, this is used as a way for consumers of this service to receive user events for further processing.
 
-Before we start, this application depends on 2 environment variables; `ENV` and `PORT`. These can be set by copying the `.env.example` file found in the `.devcontainer` directory and name the copy `.env`. Inside the `.env` file, provide the desired values for `ENV` and `PORT`.
+When it comes to the service that provides ZD user and event data, we would use the service called [pd-users-api](https://github.com/TSE-Coders/pd-users-api). For the event queue we make use of [RabbitMQ](https://www.rabbitmq.com/). 
 
-Once you have provided the environment variables, open the `Command Palette`, type `Dev Containers` and select the command `Dev Containers: Reopen in Container`. This should trigger VSCode to build a Devcontainer with everything you need to start working on the project. Once the Devcontainer is created, VSCode will close and reopen with a remote connection to the Devcontainer. From here you have everything you need to work on the project. If you need to close the remote connection between VSCode and the Devcontainer open the `Command Palette` and select the command `Dev Containers: Reopen Folder Locally`.
+### Single Host/Local Environment
 
-Some key tools that were installed into this Devcontainer are:
+To run this service you will need to have Golang version 1.21. When it comes to RabbitMQ you can either install it directly or run it with Docker. For your convenience I created a script [rabbitmq.sh](rabbitmq.sh) that you can use to start a RabbitMQ instance in a container. 
 
-- [Golang v1.21](https://github.com/devcontainers/images/tree/main/src/go)
-- [Task](https://github.com/eitsupi/devcontainer-features/tree/main/src/go-task)
+Once your RabbitMQ instance is running, start up the [pd-users-api](https://github.com/TSE-Coders/pd-users-api) service by following it's documentation. 
 
-## Running the Zendesk Service
+Now before starting up this service, you will need to set some environment variables, the list of the required variables can be found in the file [.env.example](./.env.example). 
 
-Before continuing, make sure that you are in VSCode, have a remote connection to the Devcontainer and are in the `/workspaces` directory. Getting a remote connection to the Devcontainer is covered in section [Using the Devcontainer](#using-the-devcontainer).
+Now that the required services and the environment variables are set, you can run this service. 
 
-The application has a dependency on the User Service which currently, is responsible for providing all available users and event data. To mock the User Service, there is a small application in `cmd/mockUserService`.
-
-To run the Mocked User Service, run the command below, this will startup the Mocked User Service locally so that the Zendesk Service can get the required data for it to run.
+To start the service go to the app directory:
 
 ``` bash
-task run-us
+cd cmd/app
 ```
 
-Additionally, the application relies on RabbitMQ as a message broker to provide send message to the consumers of the user events. To make starting a RabbitMQ Broker easier, you can run the `rabbitmq.sh` script locally so that docker can spin up an instance. 
-
-**Note, make sure to add values for the RABBITMQ_DEFAULT_USER and RABBITMQ_DEFAULT_PASS**, this should be the values set in the `.env` file.
-
-To run the Zendesk Service, run the command below. This will run the Zendesk Service locally.
+Run the application:
 
 ``` bash
-task run-zd
+go run main.go
 ```
-
-Since running the Zendesk Service depends on the Mock User Service, both need to be running. Since both the Zendesk Service and the Mock User Service hijacks the terminal you will need separate terminals to run them both with the commands above. So the commands above are good if you would like to run them independently, however if you would like to run them both at the same time, without needing to create another terminal instance, you can user the `--parallel` flag that Task provides. The command below will run both of the tasks `run-us` and `run-zd` at the same time, in the same terminal.
-
-``` bash
-task --parallel run-us run-zd
-```
-
-Note that VSCode will automatically port forward the ports that both the Zendesk Service and the Mock User Service expose, to your local machine so that you can access them from outside of the Devcontainer.
-
-If you would like to see if messages are actually being added to the queue, you can also run the consumer app located in `cmd/consumer`. This is a very simple Go application that receives messages from the queue so that you can see that it is working.

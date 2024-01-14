@@ -22,11 +22,3 @@ services:
     command: sleep infinity
 
     network_mode: "host"
-
-  # broker:
-  #   hostname: wabbit
-  #   image: rabbitmq:3.12.11-management
-
-  #   environment:
-  #     - RABBITMQ_DEFAULT_USER=${RMQ_USER}
-  #     - RABBITMQ_DEFAULT_PASS=${RMQ_PASS}

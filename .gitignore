@@ -29,3 +29,4 @@ go.work
 .task
 tmp/
 .env
+env

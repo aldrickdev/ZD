@@ -2,7 +2,7 @@ package service
 
 import (
 	"zd/internal/core"
-	"zd/internal/dependencies"
+	service_dependencies "zd/internal/service/dependencies"
 )
 
 const (
@@ -12,8 +12,8 @@ const (
 
 type service struct {
 	// Dependencies
-	queue dependencies.QueueBroker
-	core  dependencies.Core
+	queue service_dependencies.QueueBroker
+	core  service_dependencies.Core
 
 	// Callback Store
 	publishingCallbacks       []func(*core.FullUserEvent) error
@@ -21,16 +21,10 @@ type service struct {
 	latestFullUserEvent       *core.FullUserEvent
 }
 
-func New(queueBroker dependencies.QueueBroker, userServiceLocation, eventPath, userPath string) service {
-	z := core.NewZendeskMock(
-		userServiceLocation,
-		eventPath,
-		userPath,
-	)
-
+func New(queueBroker service_dependencies.QueueBroker, core service_dependencies.Core) service {
 	return service{
 		queue: queueBroker,
-		core:  z,
+		core:  core,
 	}
 }
 

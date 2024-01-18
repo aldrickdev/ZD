@@ -15,6 +15,10 @@ services:
       - RMQ_PASS=${RMQ_PASS}
       - RMQ_DOMAIN=${RMQ_DOMAIN}
       - RMQ_PORT=${RMQ_PORT}
+      - REDIS_DOMAIN=${REDIS_DOMAIN}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_DB=${REDIS_DB}
+      - REDIS_PASS=${REDIS_PASS}
 
     volumes:
       - ..:/workspaces:cached

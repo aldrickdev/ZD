@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Script config
+CONTAINER_NAME="tse-dashboard-event-broker"
+IMAGE_NAME="rabbitmq"
+IMAGE_TAG="3-management"
 
 # Exit on first failure
 set -e
@@ -30,7 +34,7 @@ if [ "$PASSWORD" = "" ]; then
   PASSWORD="$DEFAULT_PASSWORD"
 fi
 
-CONTAINER_ID=$(docker run --rm -d --hostname my-rabbit --name management-broker -e RABBITMQ_DEFAULT_USER=$USER -e RABBITMQ_DEFAULT_PASS=$PASSWORD -p 5672:5672 -p 15672:15672 rabbitmq:3-management)
+CONTAINER_ID=$(docker run --rm -d --hostname my-rabbit --name $CONTAINER_NAME -e RABBITMQ_DEFAULT_USER=$USER -e RABBITMQ_DEFAULT_PASS=$PASSWORD -p 5672:5672 -p 15672:15672 $IMAGE_NAME:$IMAGE_TAG)
 
 echo "The RabbitMQ container has been started, the container id is: '$CONTAINER_ID'."
 echo "You can login to the admin panel at http://localhost:15672 with the credientials below:"

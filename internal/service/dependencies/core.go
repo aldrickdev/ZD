@@ -1,4 +1,4 @@
-package dependencies
+package service_dependencies
 
 import "zd/internal/core"
 

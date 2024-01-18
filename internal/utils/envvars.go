@@ -12,6 +12,10 @@ type envVars struct {
 	RMQ_PASS        string
 	RMQ_DOMAIN      string
 	RMQ_PORT        string
+	REDIS_DOMAIN    string
+	REDIS_PORT      string
+	REDIS_DB        string
+	REDIS_PASS      string
 }
 
 var Env envVars
@@ -24,4 +28,8 @@ func LoadEnvVars() {
 	Env.RMQ_PASS = os.Getenv("RMQ_PASS")
 	Env.RMQ_DOMAIN = os.Getenv("RMQ_DOMAIN")
 	Env.RMQ_PORT = os.Getenv("RMQ_PORT")
+	Env.REDIS_DOMAIN = os.Getenv("REDIS_DOMAIN")
+	Env.REDIS_PORT = os.Getenv("REDIS_PORT")
+	Env.REDIS_DB = os.Getenv("REDIS_DB")
+	Env.REDIS_PASS = os.Getenv("REDIS_PASS")
 }

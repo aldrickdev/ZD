@@ -40,8 +40,6 @@ func (r Route) Publish(data *core.FullUserEvent) error {
 		return nil
 	}
 
-	fmt.Printf("Data being published: %+v\n", data)
-
 	var rawData []byte
 	var err error
 
@@ -86,6 +84,8 @@ func (r Route) Publish(data *core.FullUserEvent) error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Println("Successfully published data to queue")
 
 	return nil
 }

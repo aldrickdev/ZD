@@ -1,21 +1,25 @@
 package core
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"math/rand"
 	"time"
+	core_dependencies "zd/internal/core/dependencies"
 	"zd/internal/utils"
 )
 
 type ZendeskMock struct {
+	cache               core_dependencies.Cache
 	userServiceLocation string
 	eventPath           string
 	userPath            string
 }
 
-func NewZendeskMock(userServiceLocation, eventPath, userPath string) ZendeskMock {
+func NewZendeskMock(cache core_dependencies.Cache, userServiceLocation, eventPath, userPath string) ZendeskMock {
 	return ZendeskMock{
+		cache:               cache,
 		userServiceLocation: userServiceLocation,
 		eventPath:           eventPath,
 		userPath:            userPath,
@@ -53,6 +57,22 @@ func (z ZendeskMock) getAvailableEvents() ([]Event, error) {
 		z.userServiceLocation,
 		z.eventPath,
 	)
+
+	// Check to see if the Event Data has already been cached
+	result, err := z.cache.CheckCache(context.Background(), requestURL)
+	if err == nil {
+		// Cache hit
+		var eventCache []Event
+		err = json.Unmarshal([]byte(result), &eventCache)
+		if err == nil {
+			return eventCache, nil
+
+		} else {
+			fmt.Printf("Failed to unmarshal the event data cache: %q\n", err)
+		}
+	}
+
+	// Request up-to-date event data from the User Service
 	data, err := utils.GetRequest(requestURL)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting available events: %s", err)
@@ -64,6 +84,14 @@ func (z ZendeskMock) getAvailableEvents() ([]Event, error) {
 		return nil, fmt.Errorf("error unmarshaling json: %s", err)
 	}
 
+	// Cache the latest Event Data
+	_, err = z.cache.CacheData(context.Background(), requestURL, string(data), 5*time.Minute)
+	if err != nil {
+		fmt.Printf("Failed to cache the Event Data: %q\n", err)
+	} else {
+		fmt.Println("Event Data has been cached")
+	}
+
 	return events, nil
 }
 func (z ZendeskMock) getAvailableUsers() ([]User, error) {
@@ -72,6 +100,21 @@ func (z ZendeskMock) getAvailableUsers() ([]User, error) {
 		z.userServiceLocation,
 		z.userPath,
 	)
+
+	// Check to see if the user data has already been cached
+	result, err := z.cache.CheckCache(context.Background(), requestURL)
+	if err == nil {
+		// Cache hit
+		var userCache []User
+		err = json.Unmarshal([]byte(result), &userCache)
+		if err == nil {
+			return userCache, nil
+		} else {
+			fmt.Printf("Failed to unmarshal the user data cache: %q\n", err)
+		}
+	}
+
+	// Request up-to-date user data from the User Service
 	data, err := utils.GetRequest(requestURL)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting available users: %s", err)
@@ -82,6 +125,14 @@ func (z ZendeskMock) getAvailableUsers() ([]User, error) {
 	if err != nil {
 		fmt.Printf("Error Here: %q\n", err)
 		return nil, fmt.Errorf("error unmarshaling json: %s", err)
+	}
+
+	// Cache the latest User Data
+	_, err = z.cache.CacheData(context.Background(), requestURL, string(data), 1*time.Minute)
+	if err != nil {
+		fmt.Printf("Failed to cache the user data: %q\n", err)
+	} else {
+		fmt.Println("User data has been cached")
 	}
 
 	return users, nil

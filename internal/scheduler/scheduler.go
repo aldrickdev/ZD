@@ -1,6 +1,7 @@
 package scheduler
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -30,7 +31,10 @@ func (s Schedule) Run() {
 				wait = randomNumberGenerator.Intn(int(s.maxInterval))
 			}
 			time.Sleep(time.Second * time.Duration(wait))
-			s.fn()
+			err := s.fn()
+			if err != nil {
+				fmt.Printf("Failed to run scheduled function: %q\n", err)
+			}
 		}
 	}()
 }

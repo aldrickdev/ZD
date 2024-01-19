@@ -5,9 +5,9 @@ import (
 	"zd/internal/utils"
 
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
+	"github.com/labstack/gommon/log"
 )
-
-// Facebook
 
 var (
 	MockDB = struct {
@@ -140,6 +140,10 @@ func init() {
 
 func main() {
 	apiServer := echo.New()
+	apiServer.Use(middleware.Logger())
+	apiServer.Logger.SetLevel(log.DEBUG)
+	apiServer.HideBanner = true
+
 	apiServer.GET("/api/v2/users", func(c echo.Context) error {
 		return c.JSON(200, MockDB.Users)
 	})
@@ -147,5 +151,6 @@ func main() {
 	apiServer.GET("/api/v2/events", func(c echo.Context) error {
 		return c.JSON(200, MockDB.Events)
 	})
+	apiServer.Logger.Info("Starting here")
 	apiServer.Logger.Fatal(apiServer.Start(fmt.Sprintf(":%s", utils.Env.USER_SRV_PORT)))
 }

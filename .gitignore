@@ -30,3 +30,4 @@ go.work
 tmp/
 .env
 env
+build/

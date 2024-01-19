@@ -12,11 +12,15 @@ When it comes to the service that provides ZD user and event data, we would use 
 
 ### Single Host/Local Environment
 
-To run this service you will need to have Golang version 1.21. When it comes to RabbitMQ and Redis, you can either install it directly or run it with Docker. For your convenience I created a compose file [docker/dependencies.yaml](./docker/dependencies.yaml) that can be used to spin up an instance of RabbitMQ, Redis and Redis Insight (Redis UI). 
+To run this service you will need to have Golang version 1.21. When it comes to RabbitMQ and Redis, you can either install it directly or run it with Docker. For your convenience I created a compose file [docker/dependencies.yaml](./docker/dependencies.yaml) that can be used to spin up an instance of RabbitMQ, Redis and Redis Insight (Redis UI). To spin up these instances run the command below:
 
-Once your RabbitMQ Redis instances are running, start up the [pd-users-api](https://github.com/TSE-Coders/pd-users-api) service by following it's documentation. 
+``` bash
+docker compose -f docker/dependencies.yaml up -d
+```
 
-Before starting up this service, you will need to set some environment variables, the list of the required variables can be found in the file [.env.example](./.env.example). 
+Once the RabbitMQ and Redis instances are running, start up the [pd-users-api](https://github.com/TSE-Coders/pd-users-api) service by following it's documentation. 
+
+Before starting up this service, you will need to set some environment variables, the list of the required variables can be found in the file [.env.example](./.env.example). Note that you can find the running ports for the Redis and RabbitMQ services in the compose file mentioned above, regarding the RabbitMQ User and Password enviroment variables, the credentials can be found in [docker/env](./docker/env).
 
 Now that the required services and the environment variables are set, you can run this service. 
 

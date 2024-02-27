@@ -1,0 +1,14 @@
+[Unit]
+Description=Producer service
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/sandbox_repos/producer/
+ExecStart=/home/ubuntu/sandbox_repos/producer/start.sh
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

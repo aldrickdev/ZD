@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"zd/internal/rabbitmq"
+	"zd/internal/eventQueue/rabbitmq"
 	"zd/internal/utils"
 )
 

@@ -6,7 +6,7 @@ import (
 	"strconv"
 	rediscache "zd/internal/cache/redis"
 	"zd/internal/core"
-	"zd/internal/rabbitmq"
+	"zd/internal/eventQueue/rabbitmq"
 	"zd/internal/scheduler"
 	"zd/internal/service"
 	"zd/internal/utils"

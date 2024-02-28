@@ -1,7 +1,7 @@
 package service_dependencies
 
 import (
-	"zd/internal/rabbitmq"
+	"zd/internal/eventQueue/rabbitmq"
 )
 
 type QueueBroker interface {

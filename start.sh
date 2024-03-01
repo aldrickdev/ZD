@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Export Environment Variables
+export $(cat env)
+
 # Get runtime version
 VERSION=$(cat version)
 

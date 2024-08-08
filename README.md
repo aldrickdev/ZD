@@ -20,7 +20,7 @@ docker compose -f docker/dependencies.yaml up -d
 
 Once the RabbitMQ and Redis instances are running, start up the [pd-users-api](https://github.com/TSE-Coders/pd-users-api) service by following it's documentation. 
 
-Before starting up this service, you will need to set some environment variables, the list of the required variables can be found in the file [.env.example](./.env.example). Note that you can find the running ports for the Redis and RabbitMQ services in the compose file mentioned above, regarding the RabbitMQ User and Password enviroment variables, the credentials can be found in [docker/env](./docker/env).
+The environment variables that this service and the dependencies will use, can be found in [docker/env](./docker/env).
 
 Now that the required services and the environment variables are set, you can run this service. 
 
@@ -36,8 +36,22 @@ Build the Go binary:
 go build -o build/zd -buildvcs=false
 ```
 
+Export the environment variables:
+
+``` bash
+export $(cat ../../docker/env)
+```
+
 Run the application:
 
 ``` bash
 ./build/zd
 ```
+
+
+
+rabbitmq: 
+
+docker run -it --rm --name rabbitmq -p 5552:5552 -p 15672:15672 -p 5672:5672  \
+    -e RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS='-rabbitmq_stream advertised_host localhost' \
+    rabbitmq:3.13  
